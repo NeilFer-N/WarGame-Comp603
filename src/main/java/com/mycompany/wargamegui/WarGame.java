@@ -39,9 +39,23 @@ public class WarGame {
             cpuScore++;
         }
 
-        boolean gameOver = (playerScore >= TARGET_ROUND_WINS) || (cpuScore >= TARGET_ROUND_WINS);
-        Player winner = gameOver ? (playerScore >= TARGET_ROUND_WINS ? player : cpu) : null;
+        boolean gameOver = (playerScore >= TARGET_ROUND_WINS)
+                || (cpuScore >= TARGET_ROUND_WINS);
 
-        return new RoundResult(card1, card2, playerScore, cpuScore, gameOver, winner);
+        Player winner = gameOver
+                ? (playerScore >= TARGET_ROUND_WINS ? player : cpu)
+                : null;
+
+        deck.discard(card1);
+        deck.discard(card2);
+
+        return new RoundResult(
+                card1,
+                card2,
+                playerScore,
+                cpuScore,
+                gameOver,
+                winner
+        );
     }
 }

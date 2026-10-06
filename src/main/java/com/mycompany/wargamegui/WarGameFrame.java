@@ -12,12 +12,17 @@ package com.mycompany.wargamegui;
 public class WarGameFrame extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(WarGameFrame.class.getName());
-
+    private WarGame game;
     /**
      * Creates new form WarGameFrame
      */
     public WarGameFrame() {
         initComponents();
+        Deck deck = new Deck();
+        deck.shuffle();
+        Player player = new HumanPlayer("Player");
+        CPU cpu = new CPU("Computer");
+        game = new WarGame(deck, player, cpu);
     }
 
     /**
@@ -30,25 +35,42 @@ public class WarGameFrame extends javax.swing.JFrame {
     private void initComponents() {
 
         jButton1 = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jButton1.setText("Play");
         jButton1.addActionListener(this::jButton1ActionPerformed);
 
+        jLabel1.setText("jLabel1");
+
+        jLabel2.setText("jLabel2");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(143, 143, 143)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(143, 143, 143)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(179, 179, 179)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1))))
                 .addContainerGap(145, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(177, Short.MAX_VALUE)
+                .addContainerGap(65, Short.MAX_VALUE)
+                .addComponent(jLabel2)
+                .addGap(27, 27, 27)
+                .addComponent(jLabel1)
+                .addGap(53, 53, 53)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(67, 67, 67))
         );
@@ -87,5 +109,44 @@ public class WarGameFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     // End of variables declaration//GEN-END:variables
 }
+
+private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
+    RoundResult result = game.playRound();
+
+    String roundText = "You drew "
+            + result.getPlayerCard().toString()
+            + " | Computer drew "
+            + result.getCpuCard().toString();
+
+    int playerValue = result.getPlayerCard().getRank().getWarValue();
+    int cpuValue = result.getCpuCard().getRank().getWarValue();
+
+    if (playerValue > cpuValue) {
+        roundText += " — you win this round!";
+    } else if (cpuValue > playerValue) {
+        roundText += " — computer wins this round!";
+    } else {
+        roundText += " — tie!";
+    }
+
+    jLabel1.setText(roundText);
+
+    String scoreText = "Score: You "
+            + result.getPlayerScore()
+            + " — Computer "
+            + result.getCpuScore();
+
+    jLabel2.setText(scoreText);
+
+    if (result.isGameOver()) {
+        jLabel1.setText(
+                "Game Over! " + result.getWinner().getName() + " wins!"
+        );
+        jButton1.setEnabled(false);
+    }
+}
+
