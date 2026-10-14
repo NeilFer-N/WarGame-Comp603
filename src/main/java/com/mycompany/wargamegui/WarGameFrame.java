@@ -21,8 +21,8 @@ public class WarGameFrame extends javax.swing.JFrame {
         jLabel1.setText(" ");   // keeps the label's height, shows nothing
         jLabel2.setText(" ");
         startNewGame();
-        jLabel3.setIcon(loadCardIcon("card_back.png"));
-        jLabel4.setIcon(loadCardIcon("card_back.png"));
+        jLabel3.setIcon(CardImages.backIcon());
+        jLabel4.setIcon(CardImages.backIcon());
         setSize(620, 520);              // pack() alone gives a tiny window (labels start blank)
         setLocationRelativeTo(null);    // open in the middle of the screen
     }
@@ -121,8 +121,8 @@ public class WarGameFrame extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         RoundResult result = game.playRound();
 
-        jLabel3.setIcon(loadCardIcon(result.getPlayerCard().getImageFileName()));
-        jLabel4.setIcon(loadCardIcon(result.getCpuCard().getImageFileName()));
+        jLabel3.setIcon(CardImages.iconFor(result.getPlayerCard()));
+        jLabel4.setIcon(CardImages.iconFor(result.getCpuCard()));
 
         int playerValue = result.getPlayerCard().getRank().getWarValue();
         int cpuValue = result.getCpuCard().getRank().getWarValue();
@@ -151,21 +151,11 @@ public class WarGameFrame extends javax.swing.JFrame {
 
         jLabel1.setText(" ");
         jLabel2.setText(" ");
-        jLabel3.setIcon(loadCardIcon("card_back.png"));
-        jLabel4.setIcon(loadCardIcon("card_back.png"));
+        jLabel3.setIcon(CardImages.backIcon());
+        jLabel4.setIcon(CardImages.backIcon());
         jButton1.setEnabled(true);
     }//GEN-LAST:event_jButton2ActionPerformed
 
-    private javax.swing.ImageIcon loadCardIcon(String fileName) {
-    java.net.URL url = getClass().getResource("/cards/" + fileName);
-    if (url == null) {
-        logger.warning("Missing card image: " + fileName);
-        return null;
-    }
-    java.awt.Image img = new javax.swing.ImageIcon(url).getImage()
-            .getScaledInstance(100, 145, java.awt.Image.SCALE_SMOOTH);
-    return new javax.swing.ImageIcon(img);
-    }
     /**
      * @param args the command line arguments
      */
