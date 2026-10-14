@@ -26,6 +26,18 @@ public class Deck {
         }
     }
 
+    /**
+     * Creates a deck from a ready-made list of cards, for tests that need a known order.
+     * Cards are dealt from the END of the list.
+     *
+     * @param stackedCards the cards in the deck, last card is dealt first
+     */
+    public Deck(List<Card> stackedCards) {
+        cards = new ArrayList<>(stackedCards);
+        discardPile = new ArrayList<>();
+    }
+
+    /** Shuffles the cards still in the deck. */
     public void shuffle(){
         Collections.shuffle(cards);
     }
