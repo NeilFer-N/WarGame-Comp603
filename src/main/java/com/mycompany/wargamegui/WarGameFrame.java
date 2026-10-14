@@ -5,35 +5,284 @@ package com.mycompany.wargamegui;
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 
+import java.awt.Component;
+import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
+
 /**
+ * The game window. It only shows things and passes clicks on: the rules live in
+ * {@link WarGame}, and all SQL lives in {@link GameDAO} (reached through {@link GameRecorder}).
  *
  * @author neilf
  */
 public class WarGameFrame extends javax.swing.JFrame {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(WarGameFrame.class.getName());
+
+    private static final Logger LOGGER = Logger.getLogger(WarGameFrame.class.getName());
+    private static final int WINDOW_WIDTH = 620;
+    private static final int WINDOW_HEIGHT = 520;
+    private static final int HISTORY_LIMIT = 100;   // most rounds shown in a history window
+
+    private final GameDAO dao = new GameDAO();
+    private final GameRecorder recorder = new GameRecorder(dao);
     private WarGame game;
+    private String playerName;
+    private boolean databaseReady;
+
     /**
-     * Creates new form WarGameFrame
+     * Creates the window for a player called "Player". The NetBeans form editor uses this
+     * constructor; the game itself uses {@link #WarGameFrame(String)}.
      */
     public WarGameFrame() {
-        initComponents();
-        resultLabel.setText(" ");   // keeps the label's height, shows nothing
-        scoreLabel.setText(" ");
-        startNewGame();
-        playerCardLabel.setIcon(CardImages.backIcon());
-        cpuCardLabel.setIcon(CardImages.backIcon());
-        setSize(620, 520);              // pack() alone gives a tiny window (labels start blank)
-        setLocationRelativeTo(null);    // open in the middle of the screen
+        this(PlayerNames.DEFAULT_NAME);
     }
 
-    /** Builds a fresh shuffled deck, players and game. */
+    /**
+     * Creates the window, opens the database (the game still works if that fails) and
+     * starts a first game.
+     *
+     * @param playerName the already-validated name of the human player
+     */
+    public WarGameFrame(String playerName) {
+        initComponents();
+        this.playerName = playerName;
+        setJMenuBar(buildMenuBar());
+        setSize(WINDOW_WIDTH, WINDOW_HEIGHT);   // pack() alone gives a tiny window (labels start blank)
+        setLocationRelativeTo(null);            // open in the middle of the screen
+
+        // runs before EXIT_ON_CLOSE ends the program, so Derby is always shut down cleanly
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                DBManager.shutdown();
+            }
+        });
+
+        openDatabase();
+        startNewGame();
+    }
+
+    // ------------------------------------------------------------ game flow
+
+    /** Builds a fresh shuffled deck and game, and puts the window back to its starting look. */
     private void startNewGame() {
         Deck deck = new Deck();
         deck.shuffle();
-        Player player = new HumanPlayer("Player");
-        CPU cpu = new CPU("Computer");
-        game = new WarGame(deck, player, cpu);
+        game = new WarGame(deck, new HumanPlayer(playerName), new CPU(PlayerNames.CPU_NAME));
+
+        resultLabel.setText(" ");   // a single space keeps the label's height
+        scoreLabel.setText(" ");
+        playerCardLabel.setIcon(CardImages.backIcon());
+        cpuCardLabel.setIcon(CardImages.backIcon());
+        drawButton.setEnabled(true);   // a finished game leaves it disabled
+    }
+
+    private static String describe(RoundOutcome outcome) {
+        return switch (outcome) {
+            case PLAYER_WIN -> "You win this round!";
+            case CPU_WIN -> "Computer wins this round!";
+            case TIE -> "Tie!";
+        };
+    }
+
+    // ------------------------------------------------------------- database
+
+    // A failure here must never stop the game from starting.
+    private void openDatabase() {
+        try {
+            DBManager.getInstance();
+            databaseReady = true;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.WARNING, "Could not open the database", ex);
+            databaseReady = false;
+            JOptionPane.showMessageDialog(this,
+                    "The game database could not be opened. Another copy of the game may\n"
+                    + "already be running. You can still play, but stats and history\n"
+                    + "will not be saved or shown.",
+                    "Database unavailable", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private void saveRound(RoundResult result) {
+        if (!databaseReady) {
+            return;
+        }
+        try {
+            recorder.record(game, result);
+        } catch (SQLException ex) {
+            databaseReady = false;      // stop retrying (and stop nagging) after the first failure
+            showDatabaseError(ex);
+        }
+    }
+
+    private boolean requireDatabase() {
+        if (!databaseReady) {
+            JOptionPane.showMessageDialog(this,
+                    "The database is not available, so this can't be shown.",
+                    "Database unavailable", JOptionPane.INFORMATION_MESSAGE);
+        }
+        return databaseReady;
+    }
+
+    private void showDatabaseError(SQLException ex) {
+        LOGGER.log(Level.SEVERE, "Database error", ex);
+        JOptionPane.showMessageDialog(this,
+                "A database problem occurred:\n" + ex.getMessage()
+                + "\n\nThe game can carry on, but it may not be saved.",
+                "Database error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    // ----------------------------------------------------------------- menus
+
+    private JMenuBar buildMenuBar() {
+        int shortcut = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+
+        JMenu gameMenu = new JMenu("Game");
+        gameMenu.setMnemonic(KeyEvent.VK_G);
+        JMenuItem newGameItem = menuItem("New Game", e -> startNewGame());
+        newGameItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, shortcut));
+        gameMenu.add(newGameItem);
+        gameMenu.add(menuItem("Change Player Name...", e -> changePlayerName()));
+        gameMenu.addSeparator();
+        JMenuItem exitItem = menuItem("Exit", e -> dispatchEvent(
+                new WindowEvent(this, WindowEvent.WINDOW_CLOSING)));
+        exitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, shortcut));
+        gameMenu.add(exitItem);
+
+        JMenu statsMenu = new JMenu("Stats");
+        statsMenu.setMnemonic(KeyEvent.VK_S);
+        statsMenu.add(menuItem("Leaderboard", e -> showLeaderboard()));
+        statsMenu.add(menuItem("My Stats", e -> showMyStats()));
+
+        JMenu historyMenu = new JMenu("History");
+        historyMenu.setMnemonic(KeyEvent.VK_H);
+        historyMenu.add(menuItem("Recent Rounds", e -> showRecentRounds()));
+        historyMenu.add(menuItem("My Rounds", e -> showMyRounds()));
+        historyMenu.addSeparator();
+        historyMenu.add(menuItem("Clear History...", e -> clearHistory()));
+
+        JMenuBar bar = new JMenuBar();
+        bar.add(gameMenu);
+        bar.add(statsMenu);
+        bar.add(historyMenu);
+        return bar;
+    }
+
+    private static JMenuItem menuItem(String text, java.awt.event.ActionListener action) {
+        JMenuItem item = new JMenuItem(text);
+        item.addActionListener(action);
+        return item;
+    }
+
+    private void changePlayerName() {
+        String name = askPlayerName(this, playerName);
+        if (name != null) {
+            playerName = name;
+            startNewGame();     // a new name means a new game
+        }
+    }
+
+    private void showLeaderboard() {
+        if (!requireDatabase()) {
+            return;
+        }
+        try {
+            TableDialog.leaderboard(this, dao.getLeaderboard()).setVisible(true);
+        } catch (SQLException ex) {
+            showDatabaseError(ex);
+        }
+    }
+
+    private void showMyStats() {
+        if (!requireDatabase()) {
+            return;
+        }
+        try {
+            PlayerStats stats = dao.getStats(playerName);
+            String message = (stats == null)
+                    ? playerName + " has not finished a game yet."
+                    : playerName + ": " + stats.getWins() + " wins, " + stats.getLosses() + " losses";
+            JOptionPane.showMessageDialog(this, message, "My Stats", JOptionPane.INFORMATION_MESSAGE);
+        } catch (SQLException ex) {
+            showDatabaseError(ex);
+        }
+    }
+
+    private void showRecentRounds() {
+        if (!requireDatabase()) {
+            return;
+        }
+        try {
+            TableDialog.rounds(this, "Recent Rounds", dao.getRecentRounds(HISTORY_LIMIT)).setVisible(true);
+        } catch (SQLException ex) {
+            showDatabaseError(ex);
+        }
+    }
+
+    private void showMyRounds() {
+        if (!requireDatabase()) {
+            return;
+        }
+        try {
+            TableDialog.rounds(this, "My Rounds",
+                    dao.getRoundsForPlayer(playerName, HISTORY_LIMIT)).setVisible(true);
+        } catch (SQLException ex) {
+            showDatabaseError(ex);
+        }
+    }
+
+    private void clearHistory() {
+        if (!requireDatabase()) {
+            return;
+        }
+        int answer = JOptionPane.showConfirmDialog(this,
+                "Delete the whole round history? This cannot be undone.\n"
+                + "(Win/loss totals on the leaderboard are kept.)",
+                "Clear History", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (answer != JOptionPane.YES_OPTION) {
+            return;
+        }
+        try {
+            dao.clearHistory();
+        } catch (SQLException ex) {
+            showDatabaseError(ex);
+        }
+    }
+
+    /**
+     * Asks for a player name until a valid one is typed or the user cancels. The name is
+     * trimmed, and blank, too-long or reserved names are rejected with a message.
+     *
+     * @param parent  the window to centre the dialogs on (may be null)
+     * @param initial the name to pre-fill the box with
+     * @return the valid, trimmed name, or null if the user cancelled
+     */
+    public static String askPlayerName(Component parent, String initial) {
+        String suggestion = initial;
+        while (true) {
+            Object input = JOptionPane.showInputDialog(parent,
+                    "Enter your name (up to " + PlayerNames.MAX_LENGTH + " characters):",
+                    "Player name", JOptionPane.QUESTION_MESSAGE, null, null, suggestion);
+            if (input == null) {
+                return null;
+            }
+            String name = input.toString().trim();
+            String problem = PlayerNames.validate(name);
+            if (problem == null) {
+                return name;
+            }
+            JOptionPane.showMessageDialog(parent, problem, "Invalid name", JOptionPane.WARNING_MESSAGE);
+            suggestion = name;
+        }
     }
 
     /**
@@ -123,20 +372,7 @@ public class WarGameFrame extends javax.swing.JFrame {
 
         playerCardLabel.setIcon(CardImages.iconFor(result.getPlayerCard()));
         cpuCardLabel.setIcon(CardImages.iconFor(result.getCpuCard()));
-
-        int playerValue = result.getPlayerCard().getRank().getWarValue();
-        int cpuValue = result.getCpuCard().getRank().getWarValue();
-
-        String roundText;
-        if (playerValue > cpuValue) {
-            roundText = "You win this round!";
-        } else if (cpuValue > playerValue) {
-            roundText = "Computer wins this round!";
-        } else {
-            roundText = "Tie!";
-        }
-
-        resultLabel.setText(roundText);
+        resultLabel.setText(describe(result.getOutcome()));
         scoreLabel.setText("Score: You " + result.getPlayerScore()
                 + " — Computer " + result.getCpuScore());
 
@@ -144,22 +380,19 @@ public class WarGameFrame extends javax.swing.JFrame {
             resultLabel.setText("Game Over! " + result.getWinner().getName() + " wins!");
             drawButton.setEnabled(false);
         }
+        saveRound(result);
     }//GEN-LAST:event_drawButtonActionPerformed
 
     private void newGameButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newGameButtonActionPerformed
         startNewGame();
-
-        resultLabel.setText(" ");
-        scoreLabel.setText(" ");
-        playerCardLabel.setIcon(CardImages.backIcon());
-        cpuCardLabel.setIcon(CardImages.backIcon());
-        drawButton.setEnabled(true);
     }//GEN-LAST:event_newGameButtonActionPerformed
 
     /**
-     * @param args the command line arguments
+     * Starts the program: asks for a name, then opens the game window.
+     *
+     * @param args the command line arguments (not used)
      */
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -173,12 +406,17 @@ public class WarGameFrame extends javax.swing.JFrame {
                 }
             }
         } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new WarGameFrame().setVisible(true));
+        /* Ask for a name, then create and display the form */
+        java.awt.EventQueue.invokeLater(() -> {
+            String name = askPlayerName(null, PlayerNames.DEFAULT_NAME);
+            if (name != null) {     // cancelled -> nothing is opened and the program simply ends
+                new WarGameFrame(name).setVisible(true);
+            }
+        });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -190,6 +428,3 @@ public class WarGameFrame extends javax.swing.JFrame {
     private javax.swing.JLabel cpuCardLabel;
     // End of variables declaration//GEN-END:variables
 }
-
-
-
