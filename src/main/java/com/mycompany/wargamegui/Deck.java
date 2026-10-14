@@ -1,14 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.wargamegui;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
+ * A deck of 52 cards with a discard pile. When the deck runs out, the discard pile is
+ * shuffled back in.
  *
  * @author hdn0310
  */
@@ -16,7 +14,8 @@ public class Deck {
     private final List<Card> cards;
     private final List<Card> discardPile;
 
-    public Deck(){
+    /** Creates a full, unshuffled 52-card deck. */
+    public Deck() {
         cards = new ArrayList<>();
         discardPile = new ArrayList<>();
         for (Suit suit : Suit.values()) {
@@ -38,10 +37,16 @@ public class Deck {
     }
 
     /** Shuffles the cards still in the deck. */
-    public void shuffle(){
+    public void shuffle() {
         Collections.shuffle(cards);
     }
 
+    /**
+     * Deals the top card, first refilling the deck from the discard pile if it is empty.
+     *
+     * @return the dealt card
+     * @throws EmptyDeckException if there are no cards left anywhere
+     */
     public Card dealCard() {
         if (cards.isEmpty()) {
             refillFromDiscard();
@@ -52,8 +57,18 @@ public class Deck {
         return cards.remove(cards.size() - 1);
     }
 
+    /**
+     * Puts a played card on the discard pile.
+     *
+     * @param card the card to discard
+     */
     public void discard(Card card) {
         discardPile.add(card);
+    }
+
+    /** @return how many cards remain, counting the discard pile */
+    public int remainingCards() {
+        return cards.size() + discardPile.size();
     }
 
     private void refillFromDiscard() {
@@ -63,10 +78,5 @@ public class Deck {
         cards.addAll(discardPile);
         discardPile.clear();
         shuffle();
-    }
-
-
-    public int remainingCards() {
-        return cards.size() + discardPile.size();
     }
 }

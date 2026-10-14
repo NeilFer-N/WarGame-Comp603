@@ -1,17 +1,18 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.wargamegui;
 
-
 /**
+ * The computer opponent.
  *
  * @author neilf
  */
 public class CPU extends Player {
+
+    /**
+     * Creates the computer player.
+     *
+     * @param name the computer's name
+     */
     public CPU(String name) {
         super(name);
     }
 }
-
