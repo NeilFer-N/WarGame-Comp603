@@ -1,40 +1,38 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.wargamegui;
 
 /**
+ * A single playing card: a suit and a rank. Immutable.
  *
  * @author neilf
  */
 public class Card {
     private final Suit suit;
     private final Rank rank;
-    
-    public Card(Suit suit, Rank rank){
+
+    /**
+     * Creates a card.
+     *
+     * @param suit the card's suit
+     * @param rank the card's rank
+     */
+    public Card(Suit suit, Rank rank) {
         this.suit = suit;
         this.rank = rank;
     }
-    public Rank getRank(){
+
+    /** @return the card's rank */
+    public Rank getRank() {
         return rank;
     }
-    public Suit getSuits(){
+
+    /** @return the card's suit */
+    public Suit getSuit() {
         return suit;
     }
-    //Cards Images 
-    public String getImageFileName() {
-    String r = switch (rank) {
-        case JACK  -> "J";
-        case QUEEN -> "Q";
-        case KING  -> "K";
-        case ACE   -> "A";
-        default    -> String.format("%02d", rank.getWarValue()); // 02..10
-    };
-    return "card_" + suit.name().toLowerCase() + "_" + r + ".png";
-}
+
+    /** @return the card as text, e.g. "TEN of SPADES" */
     @Override
-    public String toString(){
+    public String toString() {
         return rank + " of " + suit;
     }
 }

@@ -15,14 +15,29 @@ import java.util.List;
  */
 public class GameDAO {
 
+    // the columns every history query selects; mapRound reads them back by name
+    private static final String ROUND_COLUMNS =
+            "PLAYED_AT, PLAYER_NAME, CPU_NAME, PLAYER_CARD, CPU_CARD, RESULT, "
+            + "PLAYER_SCORE_AFTER, CPU_SCORE_AFTER";
+
     // ---------------------------------------------------------------- stats
 
-    /** Adds one win for this player, creating their row the first time. */
+    /**
+     * Adds one win for this player, creating their row the first time.
+     *
+     * @param name the player's name
+     * @throws SQLException if the database write fails
+     */
     public void incrementWin(String name) throws SQLException {
         addToStats(name, 1, 0);
     }
 
-    /** Adds one loss for this player, creating their row the first time. */
+    /**
+     * Adds one loss for this player, creating their row the first time.
+     *
+     * @param name the player's name
+     * @throws SQLException if the database write fails
+     */
     public void incrementLoss(String name) throws SQLException {
         addToStats(name, 0, 1);
     }
@@ -51,7 +66,13 @@ public class GameDAO {
         }
     }
 
-    /** Returns this player's totals, or null if they have no row yet. */
+    /**
+     * Looks up one player's totals.
+     *
+     * @param name the player's name
+     * @return the totals, or null if the player has no row yet
+     * @throws SQLException if the query fails
+     */
     public PlayerStats getStats(String name) throws SQLException {
         Connection conn = DBManager.getInstance().getConnection();
 
@@ -68,7 +89,12 @@ public class GameDAO {
         }
     }
 
-    /** Every player, most wins first (fewest losses, then name, break ties). */
+    /**
+     * Lists every player, most wins first (fewest losses, then name, break ties).
+     *
+     * @return the leaderboard rows, best first
+     * @throws SQLException if the query fails
+     */
     public List<PlayerStats> getLeaderboard() throws SQLException {
         Connection conn = DBManager.getInstance().getConnection();
         List<PlayerStats> board = new ArrayList<>();
@@ -87,7 +113,12 @@ public class GameDAO {
 
     // -------------------------------------------------------------- history
 
-    /** Writes one row into ROUND_HISTORY; the ID is numbered by Derby. */
+    /**
+     * Writes one row into ROUND_HISTORY; Derby numbers the ID itself.
+     *
+     * @param round the round to save
+     * @throws SQLException if the database write fails
+     */
     public void insertRound(RoundRecord round) throws SQLException {
         Connection conn = DBManager.getInstance().getConnection();
 
@@ -107,7 +138,13 @@ public class GameDAO {
         }
     }
 
-    /** The newest rounds first, at most {@code limit} of them. */
+    /**
+     * Reads the newest rounds first.
+     *
+     * @param limit the most rounds to return; below 1 returns an empty list
+     * @return the rounds, newest first
+     * @throws SQLException if the query fails
+     */
     public List<RoundRecord> getRecentRounds(int limit) throws SQLException {
         List<RoundRecord> rounds = new ArrayList<>();
         if (limit < 1) {        // FETCH FIRST needs at least 1 row, so answer "none" ourselves
@@ -128,7 +165,14 @@ public class GameDAO {
         return rounds;
     }
 
-    /** The newest rounds in which this player took part, at most {@code limit} of them. */
+    /**
+     * Reads the newest rounds played by one player.
+     *
+     * @param name  the player's name
+     * @param limit the most rounds to return; below 1 returns an empty list
+     * @return that player's rounds, newest first
+     * @throws SQLException if the query fails
+     */
     public List<RoundRecord> getRoundsForPlayer(String name, int limit) throws SQLException {
         List<RoundRecord> rounds = new ArrayList<>();
         if (limit < 1) {
@@ -150,7 +194,11 @@ public class GameDAO {
         return rounds;
     }
 
-    /** Deletes every row of ROUND_HISTORY. Destructive: the caller should confirm first. */
+    /**
+     * Deletes every row of ROUND_HISTORY. Destructive, so the caller should confirm first.
+     *
+     * @throws SQLException if the delete fails
+     */
     public void clearHistory() throws SQLException {
         Connection conn = DBManager.getInstance().getConnection();
 
@@ -160,11 +208,6 @@ public class GameDAO {
     }
 
     // ------------------------------------------------------------ helpers
-
-    // the columns every history query selects, in the order mapRound reads them by name
-    private static final String ROUND_COLUMNS =
-            "PLAYED_AT, PLAYER_NAME, CPU_NAME, PLAYER_CARD, CPU_CARD, RESULT, "
-            + "PLAYER_SCORE_AFTER, CPU_SCORE_AFTER";
 
     // turns the ResultSet's current row into a RoundRecord
     private RoundRecord mapRound(ResultSet rs) throws SQLException {
