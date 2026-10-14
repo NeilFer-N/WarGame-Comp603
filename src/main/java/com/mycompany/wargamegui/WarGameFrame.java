@@ -18,11 +18,11 @@ public class WarGameFrame extends javax.swing.JFrame {
      */
     public WarGameFrame() {
         initComponents();
-        jLabel1.setText(" ");   // keeps the label's height, shows nothing
-        jLabel2.setText(" ");
+        resultLabel.setText(" ");   // keeps the label's height, shows nothing
+        scoreLabel.setText(" ");
         startNewGame();
-        jLabel3.setIcon(CardImages.backIcon());
-        jLabel4.setIcon(CardImages.backIcon());
+        playerCardLabel.setIcon(CardImages.backIcon());
+        cpuCardLabel.setIcon(CardImages.backIcon());
         setSize(620, 520);              // pack() alone gives a tiny window (labels start blank)
         setLocationRelativeTo(null);    // open in the middle of the screen
     }
@@ -45,34 +45,34 @@ public class WarGameFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButton1 = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jButton2 = new javax.swing.JButton();
+        drawButton = new javax.swing.JButton();
+        resultLabel = new javax.swing.JLabel();
+        scoreLabel = new javax.swing.JLabel();
+        playerCardLabel = new javax.swing.JLabel();
+        cpuCardLabel = new javax.swing.JLabel();
+        newGameButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jButton1.setText("Draw Cards");
-        jButton1.addActionListener(this::jButton1ActionPerformed);
+        drawButton.setText("Draw Cards");
+        drawButton.addActionListener(this::drawButtonActionPerformed);
 
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("jLabel1");
-        jLabel1.setToolTipText("");
-        jLabel1.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 4, true));
+        resultLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        resultLabel.setText("resultLabel");
+        resultLabel.setToolTipText("");
+        resultLabel.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 4, true));
 
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("jLabel2");
+        scoreLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        scoreLabel.setText("scoreLabel");
 
-        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel3.setText("");
+        playerCardLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        playerCardLabel.setText("");
 
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setText("");
+        cpuCardLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        cpuCardLabel.setText("");
 
-        jButton2.setText("New Game");
-        jButton2.addActionListener(this::jButton2ActionPerformed);
+        newGameButton.setText("New Game");
+        newGameButton.addActionListener(this::newGameButtonActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -80,49 +80,49 @@ public class WarGameFrame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(scoreLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(resultLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(playerCardLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(cpuCardLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.CENTER, layout.createSequentialGroup()
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(drawButton, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(newGameButton, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(30, 30, 30)
-                .addComponent(jLabel2)
+                .addComponent(scoreLabel)
                 .addGap(20, 20, 20)
-                .addComponent(jLabel1)
+                .addComponent(resultLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(jLabel4))
+                    .addComponent(playerCardLabel)
+                    .addComponent(cpuCardLabel))
                 .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(drawButton, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(newGameButton, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(30, 30, 30))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void drawButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawButtonActionPerformed
         RoundResult result = game.playRound();
 
-        jLabel3.setIcon(CardImages.iconFor(result.getPlayerCard()));
-        jLabel4.setIcon(CardImages.iconFor(result.getCpuCard()));
+        playerCardLabel.setIcon(CardImages.iconFor(result.getPlayerCard()));
+        cpuCardLabel.setIcon(CardImages.iconFor(result.getCpuCard()));
 
         int playerValue = result.getPlayerCard().getRank().getWarValue();
         int cpuValue = result.getCpuCard().getRank().getWarValue();
@@ -136,25 +136,25 @@ public class WarGameFrame extends javax.swing.JFrame {
             roundText = "Tie!";
         }
 
-        jLabel1.setText(roundText);
-        jLabel2.setText("Score: You " + result.getPlayerScore()
+        resultLabel.setText(roundText);
+        scoreLabel.setText("Score: You " + result.getPlayerScore()
                 + " — Computer " + result.getCpuScore());
 
         if (result.isGameOver()) {
-            jLabel1.setText("Game Over! " + result.getWinner().getName() + " wins!");
-            jButton1.setEnabled(false);
+            resultLabel.setText("Game Over! " + result.getWinner().getName() + " wins!");
+            drawButton.setEnabled(false);
         }
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_drawButtonActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void newGameButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newGameButtonActionPerformed
         startNewGame();
 
-        jLabel1.setText(" ");
-        jLabel2.setText(" ");
-        jLabel3.setIcon(CardImages.backIcon());
-        jLabel4.setIcon(CardImages.backIcon());
-        jButton1.setEnabled(true);
-    }//GEN-LAST:event_jButton2ActionPerformed
+        resultLabel.setText(" ");
+        scoreLabel.setText(" ");
+        playerCardLabel.setIcon(CardImages.backIcon());
+        cpuCardLabel.setIcon(CardImages.backIcon());
+        drawButton.setEnabled(true);
+    }//GEN-LAST:event_newGameButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -182,12 +182,12 @@ public class WarGameFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
+    private javax.swing.JButton drawButton;
+    private javax.swing.JButton newGameButton;
+    private javax.swing.JLabel resultLabel;
+    private javax.swing.JLabel scoreLabel;
+    private javax.swing.JLabel playerCardLabel;
+    private javax.swing.JLabel cpuCardLabel;
     // End of variables declaration//GEN-END:variables
 }
 
