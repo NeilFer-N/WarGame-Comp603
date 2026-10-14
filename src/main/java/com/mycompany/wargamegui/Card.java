@@ -22,6 +22,17 @@ public class Card {
     public Suit getSuits(){
         return suit;
     }
+    //Cards Images 
+    public String getImageFileName() {
+    String r = switch (rank) {
+        case JACK  -> "J";
+        case QUEEN -> "Q";
+        case KING  -> "K";
+        case ACE   -> "A";
+        default    -> String.format("%02d", rank.getWarValue()); // 02..10
+    };
+    return "card_" + suit.name().toLowerCase() + "_" + r + ".png";
+}
     @Override
     public String toString(){
         return rank + " of " + suit;

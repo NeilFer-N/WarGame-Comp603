@@ -9,74 +9,53 @@ package com.mycompany.wargamegui;
  * @author neilf
  */
 public class WarGame {
-    private static final int TARGET_ROUND_WINS = 3; // first to 3 round wins takes the game
+    private static final int TARGET_ROUND_WINS = 3;
 
     private final Deck deck;
     private final Player player;
     private final CPU cpu;
-
+    private int playerScore;
+    private int cpuScore;
 
     public WarGame(Deck deck, Player player, CPU cpu) {
         this.deck = deck;
         this.player = player;
         this.cpu = cpu;
+        this.playerScore = 0;
+        this.cpuScore = 0;
     }
 
-    public Player play() {
-        int playerScore = 0;
-        int cpuScore = 0;
-        int round = 0;
+    // Generated with assistance from Claude (Anthropic)
+    public RoundResult playRound() {
+        Card card1 = deck.dealCard();
+        Card card2 = deck.dealCard();
 
-        //if (logger != null) {
-            //logger.startSession(player.getName(), cpu.getName());
-        //}
+        int value1 = card1.getRank().getWarValue();
+        int value2 = card2.getRank().getWarValue();
 
-        while (playerScore < TARGET_ROUND_WINS &&
-               cpuScore < TARGET_ROUND_WINS) {
-
-            round++;
-
-            player.takeTurnPrompt();
-            cpu.takeTurnPrompt();
-
-            Card card1 = deck.dealCard();
-            Card card2 = deck.dealCard();
-
-            System.out.println(player.getName() + " draws " + card1);
-            System.out.println(cpu.getName() + " draws " + card2);
-
-            int value1 = card1.getRank().getWarValue();
-            int value2 = card2.getRank().getWarValue();
-
-            String result;
-            if (value1 > value2) {
-                playerScore++;
-                result = player.getName() + " wins the round";
-                System.out.println(player.getName() + " wins the round! Score: " + playerScore + "-" + cpuScore);
-            } else if (value2 > value1) {
-                cpuScore++;
-                result = cpu.getName() + " wins the round";
-                System.out.println(cpu.getName() + " wins the round! Score: " + playerScore + "-" + cpuScore);
-            } else {
-                result = "Tie, no points awarded";
-                System.out.println("Tie! No points awarded.");
-            }
-
-            //if (logger != null) {
-                //logger.logRound(round, player.getName(), card1, cpu.getName(), card2, result);
-            //}
-
-
-            deck.discard(card1);
-            deck.discard(card2);
+        if (value1 > value2) {
+            playerScore++;
+        } else if (value2 > value1) {
+            cpuScore++;
         }
 
-        Player winner = (playerScore >= TARGET_ROUND_WINS) ? player : cpu;
+        boolean gameOver = (playerScore >= TARGET_ROUND_WINS)
+                || (cpuScore >= TARGET_ROUND_WINS);
 
-        //if (logger != null) {
-            //logger.endSession(winner.getName());
-        //}
+        Player winner = gameOver
+                ? (playerScore >= TARGET_ROUND_WINS ? player : cpu)
+                : null;
 
-        return winner;
+        deck.discard(card1);
+        deck.discard(card2);
+
+        return new RoundResult(
+                card1,
+                card2,
+                playerScore,
+                cpuScore,
+                gameOver,
+                winner
+        );
     }
 }

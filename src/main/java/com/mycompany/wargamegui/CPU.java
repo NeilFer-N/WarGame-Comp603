@@ -10,14 +10,8 @@ package com.mycompany.wargamegui;
  * @author neilf
  */
 public class CPU extends Player {
-     public CPU(String name){
+    public CPU(String name) {
         super(name);
     }
-   
-    @Override
-    public void takeTurnPrompt() {
-        System.out.print(name + " draws automatically.");
-    }
-        
 }
 
