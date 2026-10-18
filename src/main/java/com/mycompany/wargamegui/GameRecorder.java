@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
  * Turns what happened in a game into database rows, so the window never builds
  * {@link RoundRecord}s or decides who gets a win or a loss itself.
  */
+// Generated with assistance from Claude (Anthropic)
 public class GameRecorder {
 
     private final GameDAO dao;

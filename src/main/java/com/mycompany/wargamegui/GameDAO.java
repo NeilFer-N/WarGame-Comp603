@@ -13,6 +13,7 @@ import java.util.List;
  * Data Access Object: the only class that knows SQL. The rest of the program
  * calls these plain Java methods and never touches a Connection.
  */
+// Generated with assistance from Claude (Anthropic)
 public class GameDAO {
 
     // the columns every history query selects; mapRound reads them back by name
